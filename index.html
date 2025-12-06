@@ -92,7 +92,7 @@ button:hover { transform: translateY(-2 px); }
     width: 100%;
     text-decoration: underline;
     text-decoration-thickness: 2px;   /* Grosor del subrayado */
-    text-underline-offset: 4px;       /* ← BAJA el subrayado */
+    text-underline-offset: 10px;       /* ← BAJA el subrayado */
 }
 
 
@@ -232,6 +232,21 @@ b, .negrita {
     font-weight: bold;     /* negrita */
 }
 
+.titulo-subrayado { 
+    font-size: 18pt; /* Se ajusta al Tamaño del texto */
+    font-weight: 700;
+    text-align: center;
+    text-transform: uppercase;
+    display: inline-block;     /* Se ajusta al ancho del texto */
+    margin: 35px auto 25px auto;
+
+    border-bottom: 2px solid #000;
+    padding-bottom: 1px;      /* Baja la línea */
+}
+
+
+
+
 
 </style>
 </head>
@@ -333,7 +348,11 @@ function generarVista(){
   const lineas = texto.split("\n");
 
 let primeraLinea =
-  `<div class="encabezado-principal" style="text-decoration: underline;">${lineas[0]}</div>`;
+  `<div style="text-align:center;">
+      <div class="titulo-subrayado">${lineas[0]}</div>
+   </div>`;
+
+
 
 
   let espacios = `<div style="height:20px;"></div>`;
