@@ -373,7 +373,7 @@ async function generarPDF() {
   const vista = document.getElementById("vistaPrevia");
 
 const canvas = await html2canvas(vista, { 
-    scale: 2, 
+    scale: 1.2, 
     backgroundColor: "#ffffff",
     useCORS: true 
 });
@@ -399,5 +399,3 @@ function reiniciar(){
 </script>
 </body>
 </html>
-
-
