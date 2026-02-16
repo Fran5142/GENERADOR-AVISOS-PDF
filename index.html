@@ -262,12 +262,13 @@ async function generarPDF(formatoSeleccionado) {
         pdf.addImage(imgData, "JPEG", 0, 0, pdfWidth, imgHeight, undefined, 'FAST');
     }
     
-    const sufijo = (formatoSeleccionado === 'letter') ? "_Carta" : "_Folio";
+    const sufijo = (formatoSeleccionado === 'letter') ? "_Carta" : "_Oficio";
     const nombreDoc = document.getElementById("nombrePDF").value.trim() || "Aviso_Meteorologico";
     pdf.save(nombreDoc + sufijo + ".pdf");
 }
 </script>
 </body>
 </html>
+
 
 
