@@ -27,13 +27,12 @@ body {
   display: block;
   border-radius: 10px;
   border: 2px solid #014f86;
-  font-family: Arial, sans-serif;
 }
 
-/* FORMATO FOLIO (216mm x 330mm) */
+/* El contenedor de vista previa se adapta visualmente */
 #vistaPrevia {
   width: 216mm;
-  min-height: 330mm;
+  min-height: 279.4mm; /* Altura base Carta */
   background: #fff;
   color: #000;
   margin: 20px auto;
@@ -107,7 +106,6 @@ body {
   text-transform: uppercase;
 }
 
-/* ESTILO PARA EL PIE DE LA PÁGINA WEB (AZUL) */
 footer {
   text-align: center;
   padding: 30px 10px;
@@ -119,20 +117,33 @@ footer {
 footer span {
   font-weight: bold;
   color: #90e0ef;
-  text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}
+
+/* Estilos de botones */
+.controles {
+  text-align: center;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 15px;
+  border-radius: 15px;
+  width: fit-content;
+  margin: 0 auto 20px auto;
 }
 
 button {
-  padding: 12px 25px;
+  padding: 12px 20px;
   font-weight: bold;
   cursor: pointer;
   border-radius: 8px;
   border: none;
   margin: 5px;
+  transition: 0.3s;
 }
 
 .btn-vista { background: #00b4d8; color: #001f3f; }
-.btn-pdf { background: #e63946; color: white; }
+.btn-carta { background: #4caf50; color: white; }
+.btn-folio { background: #e63946; color: white; }
+
+button:hover { opacity: 0.8; transform: scale(1.05); }
 
 b { font-weight: bold !important; }
 </style>
@@ -144,13 +155,12 @@ b { font-weight: bold !important; }
 
 <textarea id="textoInforme" placeholder="Pegue el texto del aviso aquí..."></textarea>
 
-<div style="text-align:center; margin-bottom: 10px;">
-  <input type="text" id="nombrePDF" placeholder="Nombre del archivo" style="padding:10px; width:250px; border-radius:5px; border:1px solid #ccc;">
-</div>
-
-<div style="text-align:center;">
-  <button class="btn-vista" onclick="generarVista()">🔍 Ver Vista Previa</button>
-  <button class="btn-pdf" onclick="generarPDF()">📄 Descargar PDF</button>
+<div class="controles">
+  <input type="text" id="nombrePDF" placeholder="Nombre del archivo" style="padding:10px; width:200px; border-radius:5px; border:1px solid #ccc; margin-bottom:10px;">
+  <br>
+  <button class="btn-vista" onclick="generarVista()">🔍 Actualizar Vista Previa</button>
+  <button class="btn-carta" onclick="generarPDF('letter')">📄 Descargar CARTA</button>
+  <button class="btn-folio" onclick="generarPDF([216, 330])">📄 Descargar FOLIO</button>
 </div>
 
 <div id="vistaPrevia">
@@ -210,9 +220,17 @@ function generarVista(){
     document.getElementById("contenidoPagina").innerHTML = titulo + "<div style='height:15px;'></div>" + cuerpoConNegritas;
 }
 
-async function generarPDF() {
+async function generarPDF(formatoSeleccionado) {
     const { jsPDF } = window.jspdf;
     const elemento = document.getElementById("vistaPrevia");
+
+    // Ajustamos temporalmente el min-height de la vista previa según la elección del usuario
+    // para que la captura sea exacta al tamaño de papel elegido.
+    if(formatoSeleccionado === 'letter') {
+        elemento.style.minHeight = "279.4mm";
+    } else {
+        elemento.style.minHeight = "330mm";
+    }
 
     const canvas = await html2canvas(elemento, {
         scale: 2, 
@@ -225,23 +243,28 @@ async function generarPDF() {
     const pdf = new jsPDF({
         orientation: "portrait",
         unit: "mm",
-        format: [216, 330],
+        format: formatoSeleccionado,
         compress: true 
     });
 
     const pdfWidth = pdf.internal.pageSize.getWidth();
     const pdfHeight = pdf.internal.pageSize.getHeight();
     const imgProps = pdf.getImageProperties(imgData);
+    
+    // Calculamos el alto de la imagen manteniendo la proporción del ancho
     const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
 
+    // Si la imagen es más alta que el formato elegido (Carta o Folio), se ajusta al alto.
+    // Si es más corta, se coloca arriba manteniendo su forma real.
     if (imgHeight > pdfHeight) {
         pdf.addImage(imgData, "JPEG", 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
     } else {
         pdf.addImage(imgData, "JPEG", 0, 0, pdfWidth, imgHeight, undefined, 'FAST');
     }
     
+    const sufijo = (formatoSeleccionado === 'letter') ? "_Carta" : "_Folio";
     const nombreDoc = document.getElementById("nombrePDF").value.trim() || "Aviso_Meteorologico";
-    pdf.save(nombreDoc + ".pdf");
+    pdf.save(nombreDoc + sufijo + ".pdf");
 }
 </script>
 </body>
