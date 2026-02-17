@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CONVERTIDOR AVISOS - CMM PUERTO MONTT</title>
+<title>CONVERTIDOR AVISOS - CMM MULTIZONA</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -17,6 +17,34 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+}
+
+/* Estilos para los nuevos botones de zona */
+.selector-zona {
+  text-align: center;
+  margin-bottom: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 15px;
+  border-radius: 15px;
+  width: fit-content;
+  margin: 0 auto 20px auto;
+}
+
+.btn-zona {
+  background: transparent;
+  border: 2px solid #90e0ef;
+  color: #90e0ef;
+  padding: 8px 15px;
+  margin: 5px;
+  cursor: pointer;
+  border-radius: 50px;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.btn-zona.active {
+  background: #90e0ef;
+  color: #001f3f;
 }
 
 #textoInforme {
@@ -137,7 +165,15 @@ b { font-weight: bold !important; }
 
 <body>
 
-<h1 style="text-align:center; color:white; text-transform:uppercase; margin-top:20px;">Generador de Avisos Cenmeteopmo</h1>
+<h1 style="text-align:center; color:white; text-transform:uppercase; margin-top:20px;">Generador de Avisos Multizona</h1>
+
+<div class="selector-zona">
+    <button class="btn-zona" onclick="cambiarJurisdiccion('iqq', this)">IQUIQUE</button>
+    <button class="btn-zona" onclick="cambiarJurisdiccion('valpo', this)">VALPARAÍSO</button>
+    <button class="btn-zona" onclick="cambiarJurisdiccion('tal', this)">TALCAHUANO</button>
+    <button class="btn-zona active" onclick="cambiarJurisdiccion('pmo', this)">PUERTO MONTT</button>
+    <button class="btn-zona" onclick="cambiarJurisdiccion('pnt', this)">PUNTA ARENAS</button>
+</div>
 
 <textarea id="textoInforme" placeholder="Pegue el texto del aviso aquí..."></textarea>
 
@@ -151,7 +187,7 @@ b { font-weight: bold !important; }
 
 <div id="vistaPrevia">
     <div class="cabecera-contenedor">
-        <div class="cabecera-izquierda">
+        <div class="cabecera-izquierda" id="cabeceraDinamica">
             <div class="cabecera-titulo">Armada de Chile</div>
             <div>Comandante en Jefe V Zona Naval</div>
             <div>Gobernación Marítima de Puerto Montt</div>
@@ -164,7 +200,7 @@ b { font-weight: bold !important; }
 
     <div id="contenidoPagina" style="margin-top:30mm;"></div>
 
-    <div class="pie-pagina-folio">
+    <div class="pie-pagina-folio" id="pieDinamico">
         <div class="cabecera-sub peque">CENTRO METEOROLÓGICO MARÍTIMO DE PUERTO MONTT</div>
         <div class="cabecera-sub">
             <span class="enlace">http://meteoarmada.directemar.cl</span> // 
@@ -180,45 +216,63 @@ b { font-weight: bold !important; }
 </footer>
 
 <script>
+// Base de datos para el cambio de cabeceras
+const datosJurisdiccion = {
+    iqq: {
+        cab: `<div class="cabecera-titulo">Armada de Chile</div><div>Comandancia en Jefe IV Zona Naval</div><div>Gobernación Marítima de Iquique</div><div>Centro Meteorológico Marítimo Iquique</div>`,
+        pie: `<div class="cabecera-sub peque">CENTRO METEOROLÓGICO MARÍTIMO DE IQUIQUE</div><div class="cabecera-sub"><span class="enlace">http://meteoarmada.directemar.cl</span> // <span class="enlace">@MetArmada_Iqq</span></div><div class="cabecera-sub">JORGE BARRERA S/N, IQUIQUE</div><div class="cabecera-sub">TEL: (57) 2401947</div>`
+    },
+    valpo: {
+        cab: `<div class="cabecera-titulo">Armada de Chile</div><div>Comandancia en Jefe Ia. Zona Naval</div><div>Gobernación Marítima de Valparaíso</div><div>Centro Meteorológico Marítimo Valparaíso</div>`,
+        pie: `<div class="cabecera-sub peque">CENTRO METEOROLÓGICO MARÍTIMO DE VALPARAÍSO</div><div class="cabecera-sub"><span class="enlace">http://meteoarmada.directemar.cl</span> // <span class="enlace">@MetArmada_Valp</span></div><div class="cabecera-sub">SUBIDA ARTILLERÍA S/N, VALPARAÍSO</div><div class="cabecera-sub">TEL: (32) 2202751</div>`
+    },
+    tal: {
+        cab: `<div class="cabecera-titulo">Armada de Chile</div><div>Comandancia en Jefe II Zona Naval</div><div>Gobernación Marítima de Talcahuano</div><div>Centro Meteorológico Marítimo Talcahuano</div>`,
+        pie: `<div class="cabecera-sub peque">CENTRO METEOROLÓGICO MARÍTIMO DE TALCAHUANO</div><div class="cabecera-sub"><span class="enlace">http://meteoarmada.directemar.cl</span> // <span class="enlace">@MetArmada_Tal</span></div><div class="cabecera-sub">AV. BLANCO ENCALADA S/N, TALCAHUANO</div><div class="cabecera-sub">TEL: (41) 2266110</div>`
+    },
+    pmo: {
+        cab: `<div class="cabecera-titulo">Armada de Chile</div><div>Comandante en Jefe V Zona Naval</div><div>Gobernación Marítima de Puerto Montt</div><div>Centro Meteorológico Marítimo PMO.</div>`,
+        pie: `<div class="cabecera-sub peque">CENTRO METEOROLÓGICO MARÍTIMO DE PUERTO MONTT</div><div class="cabecera-sub"><span class="enlace">http://meteoarmada.directemar.cl</span> // <span class="enlace">@MetArmada_Pmo</span></div><div class="cabecera-sub">AVENIDA ANGELMÓ 2201, PUERTO MONTT</div><div class="cabecera-sub">TEL: (65) 2205174 - 2205123</div>`
+    },
+    pnt: {
+        cab: `<div class="cabecera-titulo">Armada de Chile</div><div>Comandante en Jefe III Zona Naval</div><div>Gobernación Marítima de Punta Arenas</div><div>Centro Meteorológico Marítimo Magallanes</div>`,
+        pie: `<div class="cabecera-sub peque">CENTRO METEOROLÓGICO MARÍTIMO DE MAGALLANES</div><div class="cabecera-sub"><span class="enlace">http://meteoarmada.directemar.cl</span> // <span class="enlace">@MetArmada_Mag</span></div><div class="cabecera-sub">O'HIGGINS 1169, PUNTA ARENAS</div><div class="cabecera-sub">TEL: (61) 2201138</div>`
+    }
+};
+
+function cambiarJurisdiccion(id, btn) {
+    // Cambiar texto
+    document.getElementById('cabeceraDinamica').innerHTML = datosJurisdiccion[id].cab;
+    document.getElementById('pieDinamico').innerHTML = datosJurisdiccion[id].pie;
+    
+    // Cambiar estado de botones
+    document.querySelectorAll('.btn-zona').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    
+    // Actualizar vista si hay texto
+    generarVista();
+}
+
 function todoMayusculas(texto) { return texto.toUpperCase(); }
 
 function aplicarNegritasEspeciales(html) {
-    // 1. Secciones principales A.- B.- C.- D.-
     html = html.replace(/(A\.-[^<]*(\.|$|<br>))/g, "<b>$1</b>");
     html = html.replace(/(D\.-[^<]*(\.|$|<br>))/g, "<b>$1</b>");
     html = html.replace(/(B\.-[\s\S]*?:)/g, "<b>$1</b>");
     html = html.replace(/(C\.-[\s\S]*?:)/g, "<b>$1</b>");
-
-    // 2. REGLA MAESTRA PARA SECTORES:
-    // Pone en negrita desde la palabra SECTOR hasta el final de la línea (o antes de un <br>)
-    // Esto ignora comas y puntos intermedios.
     html = html.replace(/(SECTOR[^\n<]+)/g, "<b>$1</b>");
-
-    // 3. Tramos Geográficos estándar (Ej: CORRAL A SAN PEDRO)
-    // Solo si no fueron ya capturados por la regla de SECTOR
     const regexTramos = /(^|<br>|(?<=\.\s))([A-ZÑÁÉÍÓÚ\s]+ A [A-ZÑÁÉÍÓÚ\s]+(\:|\.))/g;
     html = html.replace(regexTramos, "$1<b>$2</b>");
-
-    // 4. Localidades simples y etiquetas
     html = html.replace(/([A-ZÑÁÉÍÓÚ\s]{4,}:)/g, "<b>$1</b>");
     html = html.replace(/(NOTAS?:)/g, "<b>$1</b>");
     html = html.replace(/(EMITIDO:)/g, "<b>$1</b>");
     html = html.replace(/(MET\d+\w+ \d+\/\w+)/g, "<b>$1</b>");
-
-    // 5. Días de la semana
     const regexDias = /((?:LUNES|MARTES|MIERCOLES|MIÉRCOLES|JUEVES|VIERNES|SABADO|SÁBADO|DOMINGO)\s\d{1,2}(?:\:|\.(?!\d)))/g;
     html = html.replace(regexDias, "<b>$1</b>");
-
-    // --- LIMPIEZA DE EXCEPCIONES (QUITAR NEGRITA DONDE NO CORRESPONDE) ---
-    
-    // Si hay una coma inmediatamente ANTES de un bloque negrita, lo quitamos (ej: ", RIZADA A MAREJADILLA")
     html = html.replace(/(,\s*)<b>([^<]+)<\/b>/g, "$1$2");
-    
-    // Frases prohibidas en negrita
     html = html.replace(/<b>INTENSIDAD MAXIMA DE VIENTO ESPERADA POR BAHIA:<\/b>/g, "INTENSIDAD MAXIMA DE VIENTO ESPERADA POR BAHIA:");
     html = html.replace(/<b>RIZADA A MAREJADILLA\.<\/b>/g, "RIZADA A MAREJADILLA.");
     html = html.replace(/<b>RIZADA A MAREJADILLA<\/b>/g, "RIZADA A MAREJADILLA");
-
     return html;
 }
 
