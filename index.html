@@ -29,10 +29,9 @@ body {
   border: 2px solid #014f86;
 }
 
-/* El contenedor de vista previa se adapta visualmente */
 #vistaPrevia {
   width: 216mm;
-  min-height: 279.4mm; /* Altura base Carta */
+  min-height: 279.4mm; 
   background: #fff;
   color: #000;
   margin: 20px auto;
@@ -94,17 +93,8 @@ body {
   color: #000;
 }
 
-.enlace { 
-  color: #0000EE; 
-  text-decoration: underline; 
-  font-weight: 500; 
-}
-
-.peque { 
-  font-size: 10pt; 
-  font-weight: bold; 
-  text-transform: uppercase;
-}
+.enlace { color: #0000EE; text-decoration: underline; font-weight: 500; }
+.peque { font-size: 10pt; font-weight: bold; text-transform: uppercase; }
 
 footer {
   text-align: center;
@@ -114,12 +104,8 @@ footer {
   margin-top: auto;
 }
 
-footer span {
-  font-weight: bold;
-  color: #90e0ef;
-}
+footer span { font-weight: bold; color: #90e0ef; }
 
-/* Estilos de botones */
 .controles {
   text-align: center;
   background: rgba(255, 255, 255, 0.1);
@@ -197,15 +183,42 @@ b { font-weight: bold !important; }
 function todoMayusculas(texto) { return texto.toUpperCase(); }
 
 function aplicarNegritasEspeciales(html) {
+    // 1. Secciones principales A.- B.- C.- D.-
     html = html.replace(/(A\.-[^<]*(\.|$|<br>))/g, "<b>$1</b>");
     html = html.replace(/(D\.-[^<]*(\.|$|<br>))/g, "<b>$1</b>");
     html = html.replace(/(B\.-[\s\S]*?:)/g, "<b>$1</b>");
     html = html.replace(/(C\.-[\s\S]*?:)/g, "<b>$1</b>");
-    html = html.replace(/(SECTOR[^\.\:]*(\:|\.(?!\d)))/g, "<b>$1</b>");
-    const regexDias = /((?:LUNES|MARTES|MIERCOLES|MIÉRCOLES|JUEVES|VIERNES|SABADO|SÁBADO|DOMINGO)\s\d{1,2}(?:\:|\.(?!\d)))/g;
-    html = html.replace(regexDias, "<b>$1</b>");
+
+    // 2. REGLA MAESTRA PARA SECTORES:
+    // Pone en negrita desde la palabra SECTOR hasta el final de la línea (o antes de un <br>)
+    // Esto ignora comas y puntos intermedios.
+    html = html.replace(/(SECTOR[^\n<]+)/g, "<b>$1</b>");
+
+    // 3. Tramos Geográficos estándar (Ej: CORRAL A SAN PEDRO)
+    // Solo si no fueron ya capturados por la regla de SECTOR
+    const regexTramos = /(^|<br>|(?<=\.\s))([A-ZÑÁÉÍÓÚ\s]+ A [A-ZÑÁÉÍÓÚ\s]+(\:|\.))/g;
+    html = html.replace(regexTramos, "$1<b>$2</b>");
+
+    // 4. Localidades simples y etiquetas
+    html = html.replace(/([A-ZÑÁÉÍÓÚ\s]{4,}:)/g, "<b>$1</b>");
+    html = html.replace(/(NOTAS?:)/g, "<b>$1</b>");
     html = html.replace(/(EMITIDO:)/g, "<b>$1</b>");
     html = html.replace(/(MET\d+\w+ \d+\/\w+)/g, "<b>$1</b>");
+
+    // 5. Días de la semana
+    const regexDias = /((?:LUNES|MARTES|MIERCOLES|MIÉRCOLES|JUEVES|VIERNES|SABADO|SÁBADO|DOMINGO)\s\d{1,2}(?:\:|\.(?!\d)))/g;
+    html = html.replace(regexDias, "<b>$1</b>");
+
+    // --- LIMPIEZA DE EXCEPCIONES (QUITAR NEGRITA DONDE NO CORRESPONDE) ---
+    
+    // Si hay una coma inmediatamente ANTES de un bloque negrita, lo quitamos (ej: ", RIZADA A MAREJADILLA")
+    html = html.replace(/(,\s*)<b>([^<]+)<\/b>/g, "$1$2");
+    
+    // Frases prohibidas en negrita
+    html = html.replace(/<b>INTENSIDAD MAXIMA DE VIENTO ESPERADA POR BAHIA:<\/b>/g, "INTENSIDAD MAXIMA DE VIENTO ESPERADA POR BAHIA:");
+    html = html.replace(/<b>RIZADA A MAREJADILLA\.<\/b>/g, "RIZADA A MAREJADILLA.");
+    html = html.replace(/<b>RIZADA A MAREJADILLA<\/b>/g, "RIZADA A MAREJADILLA");
+
     return html;
 }
 
@@ -223,53 +236,21 @@ function generarVista(){
 async function generarPDF(formatoSeleccionado) {
     const { jsPDF } = window.jspdf;
     const elemento = document.getElementById("vistaPrevia");
+    elemento.style.minHeight = (formatoSeleccionado === 'letter') ? "279.4mm" : "330mm";
 
-    // Ajustamos temporalmente el min-height de la vista previa según la elección del usuario
-    // para que la captura sea exacta al tamaño de papel elegido.
-    if(formatoSeleccionado === 'letter') {
-        elemento.style.minHeight = "279.4mm";
-    } else {
-        elemento.style.minHeight = "330mm";
-    }
-
-    const canvas = await html2canvas(elemento, {
-        scale: 2, 
-        useCORS: true,
-        backgroundColor: "#ffffff"
-    });
-
+    const canvas = await html2canvas(elemento, { scale: 2, useCORS: true, backgroundColor: "#ffffff" });
     const imgData = canvas.toDataURL("image/jpeg", 0.8);
-    
-    const pdf = new jsPDF({
-        orientation: "portrait",
-        unit: "mm",
-        format: formatoSeleccionado,
-        compress: true 
-    });
+    const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: formatoSeleccionado, compress: true });
 
     const pdfWidth = pdf.internal.pageSize.getWidth();
     const pdfHeight = pdf.internal.pageSize.getHeight();
     const imgProps = pdf.getImageProperties(imgData);
-    
-    // Calculamos el alto de la imagen manteniendo la proporción del ancho
     const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
 
-    // Si la imagen es más alta que el formato elegido (Carta o Folio), se ajusta al alto.
-    // Si es más corta, se coloca arriba manteniendo su forma real.
-    if (imgHeight > pdfHeight) {
-        pdf.addImage(imgData, "JPEG", 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
-    } else {
-        pdf.addImage(imgData, "JPEG", 0, 0, pdfWidth, imgHeight, undefined, 'FAST');
-    }
-    
+    pdf.addImage(imgData, "JPEG", 0, 0, pdfWidth, Math.min(imgHeight, pdfHeight), undefined, 'FAST');
     const sufijo = (formatoSeleccionado === 'letter') ? "_Carta" : "_Oficio";
-    const nombreDoc = document.getElementById("nombrePDF").value.trim() || "Aviso_Meteorologico";
-    pdf.save(nombreDoc + sufijo + ".pdf");
+    pdf.save((document.getElementById("nombrePDF").value.trim() || "Aviso_Meteorologico") + sufijo + ".pdf");
 }
 </script>
 </body>
 </html>
-
-
-
-
