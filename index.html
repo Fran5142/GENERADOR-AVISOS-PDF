@@ -1,424 +1,402 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador de Avisos - CMM MULTIZONA</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CONVERTIDOR AVISOS PDF</title>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<!-- Librerías -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-    <style>
-        /* =========================================
-           1. ESTILOS BASE Y FONDO
-           ========================================= */
-        body { 
-            font-family: 'Segoe UI', Helvetica, Arial, sans-serif; 
-            margin: 0; 
-            padding: 0; 
-            background-color: #000814; 
-            background-image: linear-gradient(180deg, #001d3d 0%, #000814 100%);
-            background-attachment: fixed;
-            color: #e0e0e0; 
-        }
+<style>
 
-        /* =========================================
-           2. PANEL DE CONTROL (INTERFAZ)
-           ========================================= */
-        .controles {
-            background: rgba(0, 29, 61, 0.8);
-            padding: 30px 20px 40px 20px;
-            width: 100%;
-            box-sizing: border-box;
-            border-bottom: 4px solid #003566;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-            position: relative; 
-        }
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 20px;
+  background: linear-gradient(135deg, #001f3f, #013a63, #014f86);
+  color: #000;
+}
 
-        .cabecera-contenedor {
-            display: flex;
-            align-items: center;
-            justify-content: center; 
-            max-width: 1200px;
-            margin: 0 auto 30px auto;
-            min-height: 180px; 
-        }
+h1, h2 {
+  text-align: center;
+  color: #fff;
+  font-size: 26px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 25px;
+  text-shadow: 0 0 8px rgba(0,0,0,0.3);
+}
 
-        .logo-pagina {
-            position: absolute; 
-            left: 100px;          
-            top: 40px;           
-            height: 350px;       
-            width: auto;
-            filter: drop-shadow(0 0 15px rgba(76, 201, 240, 0.4));
-        }
+#textoInforme {
+  width: 80%;
+  height: 200px;
+  margin: 0 auto 20px auto;
+  padding: 12px;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  border: 2px solid #014f86;
+  border-radius: 10px;
+  background: #fff;
+  color: #000;
+  resize: none;
+  box-shadow: inset 0 0 6px rgba(0,0,0,0.4);
+  display: block;
+}
 
-        .texto-cabecera { text-align: center; }
+button {
+  margin: 10px 5px;
+  padding: 12px 20px;
+  font-weight: bold;
+  font-size: 15px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.25s ease-in-out;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+}
 
-        .titulo-web {
-            font-size: 32px;
-            font-weight: 700;
-            margin: 0;
-            color: #ffffff;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-        }
+button:hover { transform: translateY(-2 px); }
 
-        .subtitulo-web {
-            font-size: 15px;
-            color: #4cc9f0;
-            margin: 8px 0 0 0;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            font-weight: 400;
-        }
+.btn-vista { background: #00b4d8; color: #001f3f; }
+.btn-vista:hover { background: #90e0ef; }
 
-        /* Inputs de Texto */
-        .input-estilo {
-            padding: 12px 20px;
-            width: 100%;
-            max-width: 600px;
-            border-radius: 4px;
-            border: 1px solid #4cc9f0;
-            margin-bottom: 15px;
-            font-size: 16px;
-            background: #f8f9fa;
-            color: #001d3d;
-            font-weight: bold;
-            text-align: center;
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
-        }
+.btn-pdf { background: #e63946; color: #fff; }
+.btn-pdf:hover { background: #ff5c66; }
 
-        #tituloAvisoInput {
-            border: 2px solid #ffc300; 
-            text-transform: uppercase;
-        }
+.btn-reiniciar { background: #2a9d8f; color: #fff; }
+.btn-reiniciar:hover { background: #52b2a5; }
 
-        .ejemplos-contenedor { margin: 20px auto 30px auto; max-width: 1000px; text-align: center; }
-        .ejemplos-label { font-weight: 600; color: #a3bac3; display: block; margin-bottom: 15px; font-size: 13px; text-transform: uppercase; }
-        
-        .btn-zona { 
-            background: transparent; 
-            padding: 8px 16px; 
-            border-radius: 4px; 
-            border: 1px solid #4cc9f0; 
-            color: #4cc9f0; 
-            margin: 4px; 
-            cursor: pointer; 
-            display: inline-block; 
-            font-size: 12px; 
-            transition: 0.2s; 
-            font-weight: bold;
-        }
-        .btn-zona:hover, .btn-zona.active { background: #4cc9f0; color: #001d3d; }
+#vistaPrevia {
+  width: 210mm;
+  min-height: 297mm;
+  background: #fff;
+  color: #000;
+  margin: 30px auto;
+  padding: 20mm 30mm 20mm 30mm;
+  font-family: Arial, sans-serif;
+  font-size: 12pt; /* 👈 ESTE ES EL “ARIAL 12” */
+  line-height: 1.35;
+  text-align: justify;
+}
 
-        #textoInforme { 
-            width: 90%; 
-            max-width: 1000px; 
-            height: 200px; 
-            margin: 0 auto 30px auto; 
-            padding: 15px; 
-            font-family: 'Consolas', monospace; 
-            font-size: 14px; 
-            border-radius: 4px; 
-            display: block; 
-            box-sizing: border-box; 
-            border: 1px solid #ccc; 
-            background: #ffffff; 
-            color: #212529; 
-        }
+.encabezado-principal {
+    font-size: 17pt;               /* Tamaño más estable para subrayado */
+    font-weight: 700;              /* Negrita firme */
+    text-align: center;
+    text-transform: uppercase;
+    color: #000;
+    margin: 0 0 8px 0;
+    display: inline-block;         /* Clave → subrayado perfecto */
+    width: 100%;
+    text-decoration: underline;
+    text-decoration-thickness: 2px;   /* Grosor del subrayado */
+    text-underline-offset: 10px;       /* ← BAJA el subrayado */
+}
 
-        .contenedor-acciones { text-align: center; }
-        
-        .btn-accion { 
-            margin: 5px 10px; 
-            padding: 14px 35px; 
-            font-weight: bold; 
-            border-radius: 4px; 
-            cursor: pointer; 
-            border: none; 
-            transition: 0.3s; 
-            text-transform: uppercase; 
-            letter-spacing: 1px; 
-            font-size: 13px; 
-        }
-        .btn-principal { background: #4cc9f0; color: #001d3d; }
-        .btn-carta { background: #d00000; color: #fff; }
-        .btn-oficio { background: #008000; color: #fff; }
-        .btn-accion:hover { opacity: 0.85; transform: translateY(-1px); }
 
-        .autor-web { 
-            font-size: 18px; 
-            color: #4cc9f0; 
-            margin-top: 40px; 
-            font-weight: 700; 
-            font-style: italic; 
-            text-align: center;
-        }
+footer { text-align: center; color: #e0e0e0; font-size: 13px; margin-top: 40px; letter-spacing: 0.5px; opacity: 0.85; }
+footer span { font-weight: bold; color: #90e0ef; font-size: 16px; }
 
-        /* =========================================
-           3. FORMATO HOJA (VISTA PREVIA / PDF)
-           ========================================= */
-        #vistaPrevia { 
-            width: 216mm; 
-            min-height: 279.4mm;  
-            background: #ffffff; 
-            color: #000000; 
-            margin: 50px auto; 
-            padding: 5mm 25mm 50mm 25mm; 
-            font-family: Arial, sans-serif; 
-            font-size: 10pt; 
-            line-height: 1.3; 
-            position: relative; 
-            box-sizing: border-box; 
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5); 
-        }
+.config input#nombrePDF {
+  width: 250px;
+  padding: 12px 16px;
+  font-size: 14pt;
+  font-weight: 500;
+  border: 2px solid #f0c987;
+  border-radius: 12px;
+  outline: none;
+  background: #fff8e7;
+  color: #4a4a4a;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+  transition: all 0.3s ease-in-out;
+}
 
-        .cabecera-pdf {
-            display: flex;
-            justify-content: space-between;
-            width: 100%;
-            margin-top: 10mm;
-        }
+.config input#nombrePDF:focus {
+  border-color: #f7b733;
+  background: #fff3d6;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.12); 
+}
 
-        .cabecera-pdf-izquierda {
-            text-align: center;
-            width: 55%;
-            font-size: 10pt;
-            line-height: 1.2;
-            margin-left: -14mm;
-            color: #FF0000;
-            text-transform: uppercase;
-        }
+.config.oculta { display: none; }
 
-        .cabecera-pdf-titulo { font-weight: bold; font-size: 11pt; }
+/* Negrita suave para TODO el documento */
+b, .negrita {
+    font-weight: 600 !important;  
+    letter-spacing: 0px;
+}
 
-        .cabecera-pdf-derecha img {
-            width: 18mm;
-            height: auto;
-            margin-right: 5mm;
-            margin-top: -5mm; 
-        }
+/* ====== ESTILO DE PÁGINA PREDETERMINADO ====== */
 
-        .contenedor-titulo-aviso {
-            text-align: center;
-            width: 100%;
-        }
+.pagina {
+  width: 210mm;
+  min-height: 280mm;
+  background: white;
+  margin: 0 auto;
+  padding: 25mm 20mm 20mm 20mm;
+  position: relative;
+  box-shadow: 0 0 8px rgba(0,0,0,0.15);
+}
 
-        .titulo-subrayado { 
-            font-size: 12pt; 
-            font-weight: bold;
-            text-transform: uppercase;
-            border-bottom: 2px solid #000;
-            display: inline-block;
-            margin: 15px 0; 
-            padding-bottom: 2px;
-        }
+/* CABECERA FIJA */
+.cabecera-predeterminada {
+  position: absolute;
+  top: 10mm;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  font-size: 12pt;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: #000;
+}
 
-        .cuerpo-aviso {
-            text-align: justify;
-            white-space: normal;
-        }
+/* LÍNEA BAJO CABECERA */
+.cabecera-linea {
+  width: 100%;
+  height: 2px;
+  background: #000;
+  margin: 5px auto 0 auto;
+}
 
-        .pie-pagina-pdf {
-            position: absolute;
-            bottom: 15mm;
-            right: 25mm;
-            width: auto;
-            text-align: right;
-            font-size: 10pt;
-        }
+/* PIE FIJO */
+.pie-pagina {
+  position: absolute;
+  bottom: 15mm;
+  right: 30mm;      /* 👉 Lo mueve hacia la derecha */
+  width: auto;      /* 👉 Para que no ocupe todo el ancho */
+  text-align: right;
+  font-size: 10pt;
+  color: #555;
+}
 
-        .enlace { color: #0000EE; text-decoration: underline; font-weight: 500; }
-        .peque { font-size: 10pt; font-weight: bold; text-transform: uppercase; }
 
-        b { font-weight: bold !important; }
-    </style>
+/* === NUEVA CABECERA DIVIDIDA === */
+
+.cabecera-contenedor {
+  position: absolute;
+  top: 10mm;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 15mm;
+}
+
+.cabecera-izquierda {
+    text-align: center;
+    width: 40%;
+}
+
+.cabecera-titulo {
+  font-size: 14pt;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: #000;
+}
+
+.cabecera-sub {
+  font-size: 11pt;
+  color: #000;
+  margin-top: 3px;
+  line-height: 1.2;
+}
+
+.cabecera-derecha {
+  width: 40mm;
+  height: auto;
+  text-align: right;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: -4mm;   /* Súbelo lo que necesites */
+}
+
+.cabecera-derecha img {
+  max-width: 40mm;
+  height: auto;
+  margin-right: 50mm;   /* MOVER hacia la izquierda */
+}
+ 
+.enlace {
+    color: #0000EE;      /* Azul clásico de hiperenlace */
+    text-decoration: underline;
+    font-weight: 500;    /* Negrita suave */
+}
+
+
+.peque {
+    font-size: 12pt;        /* tamaño reducido */
+    font-weight: bold;     /* negrita */
+}
+
+.titulo-subrayado { 
+    font-size: 18pt; /* Se ajusta al Tamaño del texto */
+    font-weight: 700;
+    text-align: center;
+    text-transform: uppercase;
+    display: inline-block;     /* Se ajusta al ancho del texto */
+    margin: 35px auto 25px auto;
+
+    border-bottom: 2px solid #000;
+    padding-bottom: 1px;      /* Baja la línea */
+}
+
+
+
+
+
+</style>
 </head>
 
-<body>
+<body><h1>Convertidor de AVISOS a PDF</h1>
+<h2>(MAL TIEMPO, TEMPORAL, ESPECIAL, ETC.)</h2>
 
-    <div class="controles">
-        <div class="cabecera-contenedor">
-            <img src="https://archive.org/download/escudo-servimet/ESCUDO%20SERVIMET.png" class="logo-pagina" alt="Logo Armada">
-            <div class="texto-cabecera">
-                <div class="titulo-web">Centro Meteorológico Marítimo</div>
-                <div class="titulo-web">Multizona</div>
-                <div class="subtitulo-web">Generador de Avisos Meteorológicos</div>
-            </div>
-        </div>
-        
-        <input type="text" id="nombrePDF" class="input-estilo" placeholder="Nombre del archivo (ej: Aviso_01)">
-        
-        <input type="text" id="tituloAvisoInput" class="input-estilo" placeholder="ESCRIBA AQUÍ EL TÍTULO DEL AVISO">
-        
-        <div class="ejemplos-contenedor">
-            <span class="ejemplos-label">Seleccione Jurisdicción:</span>
-            <div class="btn-zona" onclick="cambiarJurisdiccion('iqq', this)">IQUIQUE</div>
-            <div class="btn-zona" onclick="cambiarJurisdiccion('valpo', this)">VALPARAÍSO</div>
-            <div class="btn-zona" onclick="cambiarJurisdiccion('tal', this)">TALCAHUANO</div>
-            <div class="btn-zona active" onclick="cambiarJurisdiccion('pmo', this)">PUERTO MONTT</div>
-            <div class="btn-zona" onclick="cambiarJurisdiccion('pnt', this)">PUNTA ARENAS</div>
-        </div>
+<textarea id="textoInforme" placeholder="Pega aquí tu informe meteorológico en mayúsculas..."></textarea>
 
-        <textarea id="textoInforme" placeholder="Pegue aquí SOLO el cuerpo del aviso (sin el título)..."></textarea>
-        
-        <div class="contenedor-acciones">
-            <button class="btn-accion btn-principal" onclick="generarVista()">🔍 Vista Previa</button>
-            <button class="btn-accion btn-carta" onclick="generarPDF('letter')">📄 PDF Carta</button>
-            <button class="btn-accion btn-oficio" onclick="generarPDF([216, 330])">📄 PDF Oficio</button>
+<div class="config" style="text-align:center; margin-bottom:20px;">
+  <label style="font-weight:bold; font-size:14pt; color:#fff;">Nombre sugerido para PDF:</label><br>
+  <input type="text" id="nombrePDF" placeholder="Ej: Informe_Meteorologico">
+</div>
+
+<div style="text-align:center;">
+  <button class="btn-vista" onclick="generarVista()">🔍 Ver vista previa</button>
+  <button class="btn-pdf" onclick="generarPDF()">📄 Generar PDF</button>
+  <button class="btn-reiniciar" onclick="reiniciar()">🔄 Reiniciar</button>
+</div>
+
+<div id="vistaPrevia" class="pagina">
+
+    <div class="cabecera-contenedor">
+        <div class="cabecera-izquierda">
+            <div class="cabecera-titulo">Armada de Chile</div>
+            <div class="cabecera-sub">Comandante en Jefe V Zona Naval</div>
+            <div class="cabecera-sub">Gobernación Marítima de Puerto Montt</div>
+            <div class="cabecera-sub">Centro Meteorológico Marítimo PMO.</div>
         </div>
 
-        <div class="autor-web">Creado por Cabo 1º (Met.) Francisco Salas Muñoz</div>
-    </div>
-
-    <div id="vistaPrevia">
-        <div class="cabecera-pdf">
-            <div class="cabecera-pdf-izquierda" id="cabeceraDinamica">
-                <div class="cabecera-pdf-titulo">ARMADA DE CHILE</div>
-                <div>DIREC. GRAL. DEL TERRITORIO MARITIMO</div>
-                <div>Y DE MARINA MERCANTE</div>
-                <div>GOBERNACIÓN MARÍTIMA DE PUERTO MONTT</div>
-                <div>CENTRO METEOROLOGICO MARITIMO.</div>
-            </div>
-            <div class="cabecera-pdf-derecha">
-                <img src="https://archive.org/download/logo-servimet-transparente/LOGO_SERVIMET_TRANSPARENTE.png" alt="Escudo">
-            </div>
-        </div>
-
-        <div id="contenidoPagina" style="margin-top:2.0mm;"></div>
-
-        <div class="pie-pagina-pdf" id="pieDinamico">
-            <div class="peque">CENTRO METEOROLÓGICO MARÍTIMO DE PUERTO MONTT</div>
-            <div>
-                <span class="enlace">http://meteoarmada.directemar.cl</span> // 
-                <span class="enlace">@MetArmada_Pmo</span>
-            </div>
-            <div>AVENIDA ANGELMÓ 2201, PUERTO MONTT</div>
-            <div>TEL: (65) 2205174</div>
+        <div class="cabecera-derecha">
+            <!-- Aquí puedes colocar un escudo -->
+            <img src="https://archive.org/download/logo-servimet-transparente/LOGO_SERVIMET_TRANSPARENTE.png" id="escudo" alt="ESCUDO" style="width:20mm; height:auto; opacity:1.0;">
         </div>
     </div>
 
-    <script>
-        const datosJurisdiccion = {
-            iqq: {
-                cab: `<div class="cabecera-pdf-titulo">ARMADA DE CHILE</div><div>DIREC. GRAL. DEL TERRITORIO MARÍTIMO</div><div>Y DE MARINA MERCANTE</div><div>GOBERNACIÓN MARÍTIMA DE IQUIQUE</div><div>CENTRO METEOROLÓGICO MARÍTIMO.</div>`,
-                pie: `<div class="peque">CENTRO METEOROLÓGICO MARÍTIMO DE IQUIQUE</div><div><span class="enlace">http://meteoarmada.directemar.cl</span> // <span class="enlace">@MetArmada_Ique</span></div><div>JORGE BARRERA 98, IQUIQUE</div><div>TEL: (57) 2401971 - 2401945</div>`
-            },
-            valpo: {
-                cab: `<div class="cabecera-pdf-titulo">ARMADA DE CHILE</div><div>DIREC. GRAL. DEL TERRITORIO MARÍTIMO</div><div>Y DE MARINA MERCANTE</div><div>GOBERNACIÓN MARÍTIMA DE VALPARAÍSO</div><div>CENTRO METEOROLÓGICO MARÍTIMO. </div>`,
-                pie: `<div class="peque">CENTRO METEOROLÓGICO MARÍTIMO DE VALPARAÍSO</div><div><span class="enlace">http://meteoarmada.directemar.cl</span> // <span class="enlace">@MetArmada_Valp</span></div><div>SUBIDA LEOPOLDO CARVALLO 150, PLAYA ANCHA</div><div>TEL: (32) 2208965 - 2208914</div>`
-            },
-            tal: {
-                cab: `<div class="cabecera-pdf-titulo">ARMADA DE CHILE</div><div>DIREC. GRAL. DEL TERRITORIO MARÍTIMO</div><div>Y DE MARINA MERCANTE</div><div>GOBERNACIÓN MARÍTIMA DE TALCAHUANO</div><div>CENTRO METEOROLÓGICO MARÍTIMO.</div>`,
-                pie: `<div class="peque">CENTRO METEOROLÓGICO MARÍTIMO DE TALCAHUANO</div><div><span class="enlace">http://meteoarmada.directemar.cl</span> // <span class="enlace">@MetArmada_Thno</span></div><div> ALMIRANTE VILLARROEL 107, TALCAHUANO</div><div> TEL: (41) 3831157 -  3831100</div>`
-            },
-            pmo: {
-                cab: `<div class="cabecera-pdf-titulo">ARMADA DE CHILE</div><div>DIREC. GRAL. DEL TERRITORIO MARÍTIMO</div><div>Y DE MARINA MERCANTE</div><div>GOBERNACIÓN MARÍTIMA DE PUERTO MONTT</div><div>CENTRO METEOROLÓGICO MARÍTIMO.</div>`,
-                pie: `<div class="peque">CENTRO METEOROLÓGICO MARÍTIMO DE PUERTO MONTT</div><div><span class="enlace">http://meteoarmada.directemar.cl</span> // <span class="enlace">@MetArmada_Pmo</span></div><div>AVENIDA ANGELMÓ 2201, PUERTO MONTT</div><div>TEL: (65) 2205174</div>`
-            },
-            pnt: {
-                cab: `<div class="cabecera-pdf-titulo">ARMADA DE CHILE</div><div>DIREC. GRAL. DEL TERRITORIO MARÍTIMO</div><div>Y DE MARINA MERCANTE</div><div>GOBERNACIÓN MARÍTIMA DE PUNTA ARENAS</div><div>CENTRO METEOROLÓGICO MARÍTIMO.</div>`,
-                pie: `<div class="peque">CENTRO METEOROLÓGICO MARÍTIMO DE MAGALLANES</div><div><span class="enlace">http://meteoarmada.directemar.cl</span> // <span class="enlace">@MetArmada_Mag</span></div><div>AV. O'HIGGINS 1169, PUNTA ARENAS</div><div>TEL: (61) 2201148</div>`
-            }
-        };
+    <div id="contenidoPagina" style="margin-top:20mm;"></div>
 
-        function cambiarJurisdiccion(id, btn) {
-            document.getElementById('cabeceraDinamica').innerHTML = datosJurisdiccion[id].cab;
-            document.getElementById('pieDinamico').innerHTML = datosJurisdiccion[id].pie;
-            document.querySelectorAll('.btn-zona').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            generarVista();
-        }
+    <div class="pie-pagina">
 
-        function todoMayusculas(texto) { return texto.toUpperCase(); }
+<div class="cabecera-sub peque">CENTRO METEOROLÓGICO MARÍTIMO DE PUERTO MONTT</div>
 
-        function aplicarNegritasEspeciales(html) {
-            // Reglas estándar de tu código original
-            html = html.replace(/(A\.-[^<]*(\.|$|<br>))/g, "<b>$1</b>");
-            html = html.replace(/(D\.-[^<]*(\.|$|<br>))/g, "<b>$1</b>");
-            html = html.replace(/(B\.-[\s\S]*?:)/g, "<b>$1</b>");
-            html = html.replace(/(C\.-[\s\S]*?:)/g, "<b>$1</b>");
-            html = html.replace(/(SECTOR[^\n<]+)/g, "<b>$1</b>");
-            
-            // Regla para TRAMOS (Guafo a Golfo de Penas, etc)
-            const regexTramos = /(^|<br>|(?<=\.\s))([A-ZÑÁÉÍÓÚ\s]+ A [A-ZÑÁÉÍÓÚ\s]+(\:|\.))/g;
-            html = html.replace(regexTramos, "$1<b>$2</b>");
-            
-            html = html.replace(/([A-ZÑÁÉÍÓÚ\s]{4,}:)/g, "<b>$1</b>");
-            html = html.replace(/(NOTAS?:)/g, "<b>$1</b>");
-            html = html.replace(/(EMITIDO:)/g, "<b>$1</b>");
-            html = html.replace(/(MET\d+\w+ \d+\/\w+)/g, "<b>$1</b>");
-            
-            const regexDias = /((?:LUNES|MARTES|MIERCOLES|MIÉRCOLES|JUEVES|VIERNES|SABADO|SÁBADO|DOMINGO)\s\d{1,2}(?:\:|\.(?!\d)))/g;
-            html = html.replace(regexDias, "<b>$1</b>");
 
-// --- NUEVA LÓGICA DE EXCEPCIÓN ---
-            // Definimos términos meteorológicos que NO deben llevar negrita (incluye mezclas con "A")
-            const terminosSinNegrita = [
-                "POSTFRONTAL", "INESTABLE", "CUÑA", "MARGEN ANTICICLONICO", "ANTICICLONICO", 
-                "FRONTAL", "MARGEN FRONTAL", "INESTABILIDAD", "INESTABILIDAD POSTFRONTAL", 
-                "CIRCULACION CICLONICA", "PASO A MARGEN FRONTAL", "VAGUADA COSTERA", 
-                "LIGERA INESTABILIDAD", "PREFRONTAL",
-                
-                // Mezclas comunes conectadas con "A"
-                "CUÑA A MARGEN ANTICICLONICO", "MARGEN ANTICICLONICO A CUÑA",
-                "POSTFRONTAL A INESTABLE", "INESTABLE A POSTFRONTAL",
-                "POSTFRONTAL A FRONTAL", "FRONTAL A POSTFRONTAL",
-                "VAGUADA COSTERA A CUÑA", "CUÑA A VAGUADA COSTERA",
-                "VAGUADA COSTERA A MARGEN ANTICICLONICO", "MARGEN ANTICICLONICO A VAGUADA COSTERA",
-                "MARGEN FRONTAL A INESTABILIDAD", "INESTABILIDAD A MARGEN FRONTAL",
-                "PREFRONTAL A FRONTAL", "FRONTAL A PREFRONTAL",
-                "CIRCULACION CICLONICA A VAGUADA COSTERA", "LIGERA INESTABILIDAD A POSTFRONTAL"
-            ];
+<div class="cabecera-sub">
+    <span class="enlace">http://meteoarmada.directemar.cl</span>  //
+    <span class="enlace">@MetArmada_Pmo</span>
+</div>
 
-            terminosSinNegrita.forEach(termino => {
-                // Se busca el término (con o sin punto final) que haya sido puesto en negrita
-                // La regex maneja el término exacto y el término seguido de un punto
-                const regexLimpieza = new RegExp(`<b>(${termino}\\.?)</b>`, "gi");
-                html = html.replace(regexLimpieza, "$1");
-            });
+            <div class="cabecera-sub">AVENIDA ANGELMÓ 2201, PUERTO MONTT</div>
+            <div class="cabecera-sub">TEL: (65) 2205174 - 2205123</div>
 
-            terminosSinNegrita.forEach(termino => {
-                // Si el término quedó envuelto en <b> por las reglas anteriores, se lo quitamos
-                const regexLimpieza = new RegExp(`<b>(${termino})</b>`, "gi");
-                html = html.replace(regexLimpieza, "$1");
-            });
+    </div>
+</div>
 
-            return html;
-        }
 
-        function generarVista(){
-            const tituloTexto = document.getElementById("tituloAvisoInput").value.trim();
-            const areaTexto = document.getElementById("textoInforme").value.trim();
-            
-            if(!areaTexto && !tituloTexto) return;
+<footer>
+  Creado por <span>Cabo 2º (Met.) Francisco Salas Muñoz</span>
+</footer>
 
-            const tituloMayus = todoMayusculas(tituloTexto);
-            const tituloHtml = `<div class="contenedor-titulo-aviso"><span class="titulo-subrayado">${tituloMayus}</span></div>`;
-            
-            const textoMayus = todoMayusculas(areaTexto);
-            const cuerpoRaw = textoMayus.replace(/\n/g, "<br>");
-            const cuerpoConNegritas = aplicarNegritasEspeciales(cuerpoRaw);
-            const cuerpoHtml = `<div class="cuerpo-aviso">${cuerpoConNegritas}</div>`;
-            
-            document.getElementById("contenidoPagina").innerHTML = tituloHtml + "<div style='height:15px;'></div>" + cuerpoHtml;
-        }
+<script>
 
-        async function generarPDF(formatoSeleccionado) {
-            const { jsPDF } = window.jspdf;
-            const elemento = document.getElementById("vistaPrevia");
-            const canvas = await html2canvas(elemento, { scale: 2, useCORS: true, backgroundColor: "#ffffff" });
-            const imgData = canvas.toDataURL("image/jpeg", 0.8);
-            const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: formatoSeleccionado, compress: true });
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = pdf.internal.pageSize.getHeight();
-            pdf.addImage(imgData, "JPEG", 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
-            const sufijo = (formatoSeleccionado === 'letter') ? "_Carta" : "_Oficio";
-            pdf.save((document.getElementById("nombrePDF").value.trim() || "Aviso_Meteorologico") + sufijo + ".pdf");
-        }
-    </script>
+// MAYÚSCULAS
+function todoMayusculas(texto) {
+  return texto.toUpperCase();
+}
+
+// ✔ NEGRITAS A B C D + PRONOSTICO corregido
+function aplicarNegritasEspeciales(html) {
+
+    // A.- y D.- hasta el primer punto
+    html = html.replace(/(^|<br>)(A\.-[\s\S]*?\.)/g, "$1<b>$2</b>");
+    html = html.replace(/(^|<br>)(D\.-[\s\S]*?\.)/g, "$1<b>$2</b>");
+
+    // B.- y C.- hasta los dos puntos
+    html = html.replace(/(^|<br>)(B\.-[\s\S]*?:)/g, "$1<b>$2</b>");
+    html = html.replace(/(^|<br>)(C\.-[\s\S]*?:)/g, "$1<b>$2</b>");
+
+    // ⭐⭐⭐ SOLUCIÓN DEFINITIVA PARA C.- PRONOSTICO ⭐⭐⭐
+    // Captura C.- PRONOSTICO:
+    // y TODO lo que esté inmediatamente abajo (sin importar cómo se generó la línea)
+    // hasta el primer punto REAL.
+    html = html.replace(
+        /(C\.\-\s*PRONOSTICO:\s*)([\s\S]*?\.)(?=\s|<br>|$)/i,
+        "<b>$1$2</b>"
+    );
+
+    // ⭐ EMITIDO: EN NEGRITA ⭐
+    html = html.replace(/(EMITIDO:)/g, "<b>$1</b>");
+
+    return html;
+}
+
+function generarVista(){
+  let texto = document.getElementById("textoInforme").value.trim();
+  if(!texto){ alert("Por favor, pega el texto del informe meteorológico."); return; }
+
+  texto = todoMayusculas(texto);
+
+  const lineas = texto.split("\n");
+
+let primeraLinea =
+  `<div style="text-align:center;">
+      <div class="titulo-subrayado">${lineas[0]}</div>
+   </div>`;
+
+
+
+
+  let espacios = `<div style="height:20px;"></div>`;
+
+  const resto = lineas.slice(1).join("\n");
+
+  let html = resto.replace(/\n/g, "<br>");
+
+  html = aplicarNegritasEspeciales(html);
+
+document.getElementById("contenidoPagina").innerHTML =
+    `${primeraLinea}${espacios}${html}`;
+
+}
+
+async function generarPDF() {
+  const { jsPDF } = window.jspdf;
+  const vista = document.getElementById("vistaPrevia");
+
+const canvas = await html2canvas(vista, { 
+    scale: 1.2, 
+    backgroundColor: "#ffffff",
+    useCORS: true 
+});
+
+  const imgData = canvas.toDataURL("image/png");
+  const pdf = new jsPDF("p", "mm", "letter");
+
+  const pageWidth = 216;
+  const imgWidth = 210;
+  const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+  const nombreArchivo = document.getElementById("nombrePDF").value.trim() || "Informe_Meteorologico";
+  pdf.addImage(imgData, "PNG", (pageWidth - imgWidth) / 2, 10, imgWidth, imgHeight);
+  pdf.save(nombreArchivo + ".pdf");
+}
+
+function reiniciar(){
+  document.getElementById("textoInforme").value = "";
+  document.getElementById("vistaPrevia").innerHTML = "";
+  document.getElementById("nombrePDF").value = "";
+}
+
+</script>
 </body>
 </html>
+
