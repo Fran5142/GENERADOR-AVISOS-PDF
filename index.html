@@ -285,8 +285,9 @@
         function todoMayusculas(texto) { return texto.toUpperCase(); }
 
         function aplicarNegritasEspeciales(html) {
-            // Nueva función: Pone en negrita cualquier texto entre paréntesis
-            html = html.replace(/(\([^)]+\))/g, "<b>$1</b>");
+            // Se agregan específicamente MAL TIEMPO y TEMPORAL entre paréntesis en negrita
+            html = html.replace(/(\(MAL TIEMPO\))/g, "<b>$1</b>");
+            html = html.replace(/(\(TEMPORAL\))/g, "<b>$1</b>");
 
             html = html.replace(/(A\.-[^<]*(\.|$|<br>))/g, "<b>$1</b>");
             html = html.replace(/(D\.-[^<]*(\.|$|<br>))/g, "<b>$1</b>");
