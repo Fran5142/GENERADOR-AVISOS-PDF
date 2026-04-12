@@ -285,6 +285,9 @@
         function todoMayusculas(texto) { return texto.toUpperCase(); }
 
         function aplicarNegritasEspeciales(html) {
+            // Nueva función: Pone en negrita cualquier texto entre paréntesis
+            html = html.replace(/(\([^)]+\))/g, "<b>$1</b>");
+
             html = html.replace(/(A\.-[^<]*(\.|$|<br>))/g, "<b>$1</b>");
             html = html.replace(/(D\.-[^<]*(\.|$|<br>))/g, "<b>$1</b>");
             html = html.replace(/(B\.-[\s\S]*?:)/g, "<b>$1</b>");
