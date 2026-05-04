@@ -250,6 +250,35 @@
         .peque { font-size: 10pt; font-weight: bold; text-transform: uppercase; }
 
         b { font-weight: bold !important; }
+
+        /* =========================================
+           4. BOTÓN FLOTANTE
+           ========================================= */
+        .btn-flotante {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: #ffc300;
+            color: #001d3d;
+            padding: 15px 25px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 14px;
+            text-transform: uppercase;
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-flotante:hover {
+            transform: translateY(-5px);
+            background-color: #e6b000;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7);
+        }
     </style>
 </head>
 
@@ -317,6 +346,11 @@
             <div>TEL: (65) 2205174</div>
         </div>
     </div>
+
+    <!-- BOTÓN FLOTANTE AGREGADO AQUÍ -->
+    <a href="https://fran5142.github.io/AVISOS-JPG/" class="btn-flotante" target="_blank">
+        Ir a Avisos JPG ➡
+    </a>
 
     <script>
         // Función para insertar título desde los botones rápidos
