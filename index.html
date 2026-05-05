@@ -477,8 +477,10 @@
 
             html = html.replace(/(A\.-[^<]*(\.|$|<br>))/g, "<b>$1</b>");
             html = html.replace(/(D\.-[^<]*(\.|$|<br>))/g, "<b>$1</b>");
-            html = html.replace(/(B\.-[\s\S]*?:)/g, "<b>$1</b>");
-            html = html.replace(/(C\.-[\s\S]*?:)/g, "<b>$1</b>");
+            
+            // MODIFICACIÓN APLICADA AQUÍ: Solo aplicará negrita a la letra y al texto en mayúsculas estrictamente hasta encontrar los dos puntos (:).
+            html = html.replace(/(B\.-[A-ZÑÁÉÍÓÚ\s]+:)/g, "<b>$1</b>");
+            html = html.replace(/(C\.-[A-ZÑÁÉÍÓÚ\s]+:)/g, "<b>$1</b>");
 
             html = html.replace(/(^|<br>)(SECTOR[^\n<]+)/g, "$1<b>$2</b>");
             
