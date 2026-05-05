@@ -477,15 +477,20 @@
 
             html = html.replace(/(A\.-[^<]*(\.|$|<br>))/g, "<b>$1</b>");
             html = html.replace(/(D\.-[^<]*(\.|$|<br>))/g, "<b>$1</b>");
-            
-            // MODIFICACIÓN APLICADA AQUÍ: Solo aplicará negrita a la letra y al texto en mayúsculas estrictamente hasta encontrar los dos puntos (:).
             html = html.replace(/(B\.-[A-ZÑÁÉÍÓÚ\s]+:)/g, "<b>$1</b>");
             html = html.replace(/(C\.-[A-ZÑÁÉÍÓÚ\s]+:)/g, "<b>$1</b>");
 
             html = html.replace(/(^|<br>)(SECTOR[^\n<]+)/g, "$1<b>$2</b>");
             
+            // MODIFICACIÓN APLICADA AQUÍ: Filtro inteligente para "regexTramos"
             const regexTramos = /(^|<br>|(?<=\.\s))([A-ZÑÁÉÍÓÚ\s]+ A [A-ZÑÁÉÍÓÚ\s]+(\:|\.))/g;
-            html = html.replace(regexTramos, "$1<b>$2</b>");
+            html = html.replace(regexTramos, function(match, p1, p2) {
+                // Si la frase detectada contiene palabras típicas de una situación sinóptica, NO le aplicamos negrita.
+                if (/(INESTABLE|ANTICICLÓNIC|FRONTAL|CUÑA|VAGUADA|CICLÓNIC|PRESIÓN|INESTABILIDAD|POSTFRONTAL|PREFRONTAL|SISTEMA)/i.test(p2)) {
+                    return p1 + p2;
+                }
+                return p1 + "<b>" + p2 + "</b>"; // Si es un tramo geográfico normal, se le pone negrita.
+            });
             
             html = html.replace(/([A-ZÑÁÉÍÓÚ\s]{4,}:)/g, "<b>$1</b>");
             html = html.replace(/(NOTAS?:)/g, "<b>$1</b>");
@@ -507,7 +512,10 @@
                 "VAGUADA COSTERA A MARGEN ANTICICLÓNICO", "MARGEN ANTICICLÓNICO A VAGUADA COSTERA",
                 "MARGEN FRONTAL A INESTABILIDAD", "INESTABILIDAD A MARGEN FRONTAL",
                 "PREFRONTAL A FRONTAL", "FRONTAL A PREFRONTAL",
-                "CIRCULACIÓN CICLÓNICA A VAGUADA COSTERA", "LIGERA INESTABILIDAD A POSTFRONTAL"
+                "CIRCULACIÓN CICLÓNICA A VAGUADA COSTERA", "LIGERA INESTABILIDAD A POSTFRONTAL",
+                // He añadido estas también a la lista blanca por pura precaución
+                "INESTABLE A MARGEN ANTICICLÓNICO", "MARGEN ANTICICLÓNICO A INESTABLE",
+                "FRONTAL A INESTABLE", "INESTABLE A FRONTAL"
             ];
 
             terminosSinNegrita.forEach(termino => {
