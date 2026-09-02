@@ -100,7 +100,7 @@
         .botones-rapidos-contenedor {
             text-align: center;
             margin: -5px auto 20px auto;
-            max-width: 800px;
+            max-width: 900px;
             display: flex;
             justify-content: center;
             flex-wrap: wrap;
@@ -200,15 +200,15 @@
 
         .cabecera-pdf-izquierda {
             text-align: center;
-            width: 55%;
+            width: 60%;
             font-size: 9.0pt; 
             line-height: 1.2;
-            margin-left: -14mm;
+            margin-left: -16mm;
             color: #FF0000;
             text-transform: uppercase;
         }
 
-        .cabecera-pdf-titulo { font-weight: bold; font-size: 11pt; }
+        .cabecera-pdf-titulo { font-weight: bold; font-size: 10pt; text-transform: none; }
 
         .cabecera-pdf-derecha img {
             width: 28mm; 
@@ -223,7 +223,7 @@
         }
 
         .titulo-subrayado { 
-            font-size: 12pt; 
+            font-size: 11pt; 
             font-weight: bold;
             text-transform: uppercase;
             border-bottom: 2px solid #000;
@@ -300,10 +300,11 @@
         
         <!-- BOTONES DE INSERCIÓN RÁPIDA -->
         <div class="botones-rapidos-contenedor">
-            <button class="btn-rapido" onclick="insertarTitulo('AVISO DE MAL TIEMPO')">AVISO DE MAL TIEMPO</button>
-            <button class="btn-rapido" onclick="insertarTitulo('AVISO DE TEMPORAL')">AVISO DE TEMPORAL</button>
-            <button class="btn-rapido" onclick="insertarTitulo('AVISO ESPECIAL')">AVISO ESPECIAL</button>
-            <button class="btn-rapido" onclick="insertarTitulo('AVISO DE VIENTO FUERTE')">AVISO DE VIENTO FUERTE</button>
+            <button class="btn-rapido" onclick="insertarTitulo('AVISO DE MAL TIEMPO')">MAL TIEMPO</button>
+            <button class="btn-rapido" onclick="insertarTitulo('AVISO DE TEMPORAL')">TEMPORAL</button>
+            <button class="btn-rapido" onclick="insertarTitulo('AVISO ESPECIAL')">ESPECIAL</button>
+            <button class="btn-rapido" onclick="insertarTitulo('AVISO DE VIENTO FUERTE')">VIENTO FUERTE</button>
+            <button class="btn-rapido" onclick="insertarTitulo('AVISO PROBABILIDAD DE OCURRENCIA DE NUBES CONVECTIVAS FACTIBLE DE GENERAR TROMBAS MARINAS')">TROMBAS MARINAS</button>
         </div>
 
         <div class="ejemplos-contenedor">
@@ -326,7 +327,7 @@
             <div class="cabecera-pdf-izquierda" id="cabeceraDinamica">
                 <div class="cabecera-pdf-titulo">ARMADA DE CHILE</div>
                 <div>DIRECCIÓN GRAL. DEL TERRITORIO MARÍTIMO</div>
-                <div>Y DE MARINA MERCANTE</div>
+                <div>Y MARINA MERCANTE</div>
                 <div>GOBERNACIÓN MARÍTIMA DE PUERTO MONTT</div>
             </div>
             <div class="cabecera-pdf-derecha">
@@ -377,13 +378,10 @@
             texto = texto.replace(/\bSE DEBE\b/g, "@@SE_DEBE@@");
 
             // 2. EXPANSIÓN DE DIRECCIONES DE VIENTO AISLADAS
-            // El (?<![A-Z\/]) y (?![A-Z\/°]) asegura que solo cambien si no hay barras, letras o símbolo de grados pegados.
             texto = texto.replace(/(?<![A-Z\/])\bN\b(?![A-Z\/°])/g, "NORTE");
             texto = texto.replace(/(?<![A-Z\/])\bNW\b(?![A-Z\/])/g, "NORWESTE");
             texto = texto.replace(/(?<![A-Z\/])\bW\b(?![A-Z\/])/g, "WESTE");
             texto = texto.replace(/(?<![A-Z\/])\bSE\b(?![A-Z\/])/g, "SURESTE");
-
-            // Adicionales sugeridos lógicamente que respetan las combinadas:
             texto = texto.replace(/(?<![A-Z\/])\bS\b(?![A-Z\/])/g, "SUR");
             texto = texto.replace(/(?<![A-Z\/])\bNE\b(?![A-Z\/])/g, "NORESTE");
             texto = texto.replace(/(?<![A-Z\/])\bSW\b(?![A-Z\/])/g, "SURWESTE");
@@ -402,65 +400,29 @@
 
             // Regla ortográfica manual
             texto = texto.replace(/\bATTRASO\b/g, "ATRASO");
+            
+            // Reemplazo temporal de viñetas para formateo de sangría francesa
+            texto = texto.replace(/•\s*/g, "@@BULLET@@");
 
-            // Diccionario de tildes frecuentes en meteorología
+            // Diccionario de tildes frecuentes en meteorología (actualizado para este aviso)
             const tildes = {
-                "PRONOSTICO": "PRONÓSTICO",
-                "SITUACION": "SITUACIÓN",
-                "SINOPTICA": "SINÓPTICA",
-                "ANTICICLONICO": "ANTICICLÓNICO",
-                "ANTICICLONICA": "ANTICICLÓNICA",
-                "METEOROLOGIA": "METEOROLOGÍA",
-                "CICLONICO": "CICLÓNICO",
-                "CICLONICA": "CICLÓNICA",
-                "MARITIMO": "MARÍTIMO",
-                "MARITIMA": "MARÍTIMA",
-                "OCEANICO": "OCEÁNICO",
-                "OCEANICA": "OCEÁNICA",
-                "DIRECCION": "DIRECCIÓN",
-                "PRESION": "PRESIÓN",
-                "DEPRESION": "DEPRESIÓN",
-                "TRANSICION": "TRANSICIÓN",
-                "MAXIMA": "MÁXIMA",
-                "MINIMA": "MÍNIMA",
-                "DEBIL": "DÉBIL",
-                "RAFAGA": "RÁFAGA",
-                "RAFAGAS": "RÁFAGAS",
-                "AREA": "ÁREA",
-                "AREAS": "ÁREAS",
-                "ESTACION": "ESTACIÓN",
-                "CONDICION": "CONDICIÓN",
-                "SABADO": "SÁBADO",
-                "MIERCOLES": "MIÉRCOLES",
-                "PACIFICO": "PACÍFICO",
-                "FENOMENO": "FENÓMENO",
-                "FENOMENOS": "FENÓMENOS",
-                "PROXIMO": "PRÓXIMO",
-                "ULTIMO": "ÚLTIMO",
-                "PRECIPITACION": "PRECIPITACIÓN",
-                "CARACTERISTICA": "CARACTERÍSTICA",
-                "CARACTERISTICAS": "CARACTERÍSTICAS",
-                "SECCION": "SECCIÓN",
-                "INFORMACION": "INFORMACIÓN",
-                "VALPARAISO": "VALPARAÍSO",
-                "CONCEPCION": "CONCEPCIÓN",
-                "CONSTITUCION": "CONSTITUCIÓN",
-                "CHILOE": "CHILOÉ",
-                "REGION": "REGIÓN",
-                "ANALISIS": "ANÁLISIS",
-                "SINOPTICO": "SINÓPTICO",
-                "ARCHIPIELAGO": "ARCHIPIÉLAGO",
-                "INFORMARAN": "INFORMARÁN",
-                "RADIACION": "RADIACIÓN",
-                "INDICE": "ÍNDICE",
-                "CIRCULACION": "CIRCULACIÓN",
-                "BAHIA": "BAHÍA",
-                "APROXIMACION": "APROXIMACIÓN",
-                "AYSEN": "AYSÉN",
-                "QUELLON": "QUELLÓN",
-                "MAULLIN": "MAULLÍN",
-                "RELONCAVI": "RELONCAVÍ",
-                "PENINSULA": "PENÍNSULA"
+                "PRONOSTICO": "PRONÓSTICO", "SITUACION": "SITUACIÓN", "SINOPTICA": "SINÓPTICA",
+                "ANTICICLONICO": "ANTICICLÓNICO", "ANTICICLONICA": "ANTICICLÓNICA", "METEOROLOGIA": "METEOROLOGÍA",
+                "CICLONICO": "CICLÓNICO", "CICLONICA": "CICLÓNICA", "MARITIMO": "MARÍTIMO", "MARITIMA": "MARÍTIMA",
+                "OCEANICO": "OCEÁNICO", "OCEANICA": "OCEÁNICA", "DIRECCION": "DIRECCIÓN", "PRESION": "PRESIÓN",
+                "DEPRESION": "DEPRESIÓN", "TRANSICION": "TRANSICIÓN", "MAXIMA": "MÁXIMA", "MINIMA": "MÍNIMA",
+                "DEBIL": "DÉBIL", "RAFAGA": "RÁFAGA", "RAFAGAS": "RÁFAGAS", "AREA": "ÁREA", "AREAS": "ÁREAS",
+                "ESTACION": "ESTACIÓN", "CONDICION": "CONDICIÓN", "SABADO": "SÁBADO", "MIERCOLES": "MIÉRCOLES",
+                "PACIFICO": "PACÍFICO", "FENOMENO": "FENÓMENO", "FENOMENOS": "FENÓMENOS", "PROXIMO": "PRÓXIMO",
+                "ULTIMO": "ÚLTIMO", "PRECIPITACION": "PRECIPITACIÓN", "CARACTERISTICA": "CARACTERÍSTICA",
+                "CARACTERISTICAS": "CARACTERÍSTICAS", "SECCION": "SECCIÓN", "INFORMACION": "INFORMACIÓN",
+                "VALPARAISO": "VALPARAÍSO", "CONCEPCION": "CONCEPCIÓN", "CONSTITUCION": "CONSTITUCIÓN",
+                "CHILOE": "CHILOÉ", "REGION": "REGIÓN", "ANALISIS": "ANÁLISIS", "SINOPTICO": "SINÓPTICO",
+                "ARCHIPIELAGO": "ARCHIPIÉLAGO", "INFORMARAN": "INFORMARÁN", "RADIACION": "RADIACIÓN",
+                "INDICE": "ÍNDICE", "CIRCULACION": "CIRCULACIÓN", "BAHIA": "BAHÍA", "APROXIMACION": "APROXIMACIÓN",
+                "AYSEN": "AYSÉN", "QUELLON": "QUELLÓN", "MAULLIN": "MAULLÍN", "RELONCAVI": "RELONCAVÍ",
+                "PENINSULA": "PENÍNSULA", "DIA": "DÍA", "ATENCION": "ATENCIÓN", "VALIDO": "VÁLIDO",
+                "FORMACION": "FORMACIÓN", "ALEJANDOTE": "ALEJÁNDOTE"
             };
 
             for (const [sinTilde, conTilde] of Object.entries(tildes)) {
@@ -471,28 +433,30 @@
         }
 
         function aplicarNegritasEspeciales(html) {
-            // Se agregan específicamente MAL TIEMPO y TEMPORAL entre paréntesis en negrita
             html = html.replace(/(\(MAL TIEMPO\))/g, "<b>$1</b>");
             html = html.replace(/(\(TEMPORAL\))/g, "<b>$1</b>");
 
             html = html.replace(/(A\.-[^<]*(\.|$|<br>))/g, "<b>$1</b>");
             html = html.replace(/(D\.-[^<]*(\.|$|<br>))/g, "<b>$1</b>");
+            
             html = html.replace(/(B\.-[A-ZÑÁÉÍÓÚ\s]+:)/g, "<b>$1</b>");
             html = html.replace(/(C\.-[A-ZÑÁÉÍÓÚ\s]+:)/g, "<b>$1</b>");
+            
+            html = html.replace(/(DÍA, HORARIO Y SECTOR DE MAYOR ATENCIÓN:)/g, "<b>$1</b>");
 
             html = html.replace(/(^|<br>)(SECTOR[^\n<]+)/g, "$1<b>$2</b>");
             
-            // MODIFICACIÓN APLICADA AQUÍ: Filtro inteligente para "regexTramos"
-            const regexTramos = /(^|<br>|(?<=\.\s))([A-ZÑÁÉÍÓÚ\s]+ A [A-ZÑÁÉÍÓÚ\s]+(\:|\.))/g;
+            const regexTramos = /(^|<br>|(?<=\.\s))([A-ZÑÁÉÍÓÚ\s]+ A [A-ZÑÁÉÍÓÚ\s]+(\:\.))/g;
             html = html.replace(regexTramos, function(match, p1, p2) {
-                // Si la frase detectada contiene palabras típicas de una situación sinóptica, NO le aplicamos negrita.
                 if (/(INESTABLE|ANTICICLÓNIC|FRONTAL|CUÑA|VAGUADA|CICLÓNIC|PRESIÓN|INESTABILIDAD|POSTFRONTAL|PREFRONTAL|SISTEMA)/i.test(p2)) {
                     return p1 + p2;
                 }
-                return p1 + "<b>" + p2 + "</b>"; // Si es un tramo geográfico normal, se le pone negrita.
+                return p1 + "<b>" + p2 + "</b>";
             });
             
-            html = html.replace(/([A-ZÑÁÉÍÓÚ\s]{4,}:)/g, "<b>$1</b>");
+            // Corrección: Evitar que textos largos y enlaces web (como HTTP://) se pongan en negrita accidentalmente
+            html = html.replace(/(^|<br>)([A-ZÑÁÉÍÓÚ\s]{4,60}:)(?!\/\/)/g, "$1<b>$2</b>");
+
             html = html.replace(/(NOTAS?:)/g, "<b>$1</b>");
             html = html.replace(/(EMITIDO:)/g, "<b>$1</b>");
             html = html.replace(/(MET\d+\w+ \d+\/\w+)/g, "<b>$1</b>");
@@ -513,13 +477,12 @@
                 "MARGEN FRONTAL A INESTABILIDAD", "INESTABILIDAD A MARGEN FRONTAL",
                 "PREFRONTAL A FRONTAL", "FRONTAL A PREFRONTAL",
                 "CIRCULACIÓN CICLÓNICA A VAGUADA COSTERA", "LIGERA INESTABILIDAD A POSTFRONTAL",
-                // He añadido estas también a la lista blanca por pura precaución
                 "INESTABLE A MARGEN ANTICICLÓNICO", "MARGEN ANTICICLÓNICO A INESTABLE",
                 "FRONTAL A INESTABLE", "INESTABLE A FRONTAL"
             ];
 
             terminosSinNegrita.forEach(termino => {
-                const regexLimpieza = new RegExp(`<b>(${termino}\\.?)</b>`, "gi");
+                const regexLimpieza = new RegExp(`<b>(${termino}\.?)</b>`, "gi");
                 html = html.replace(regexLimpieza, "$1");
             });
 
@@ -537,16 +500,18 @@
             
             if(!areaTexto && !tituloTexto) return;
 
-            // Procesar y corregir el Título
             let tituloMayus = todoMayusculas(tituloTexto);
             tituloMayus = corregirOrtografiaYTerminos(tituloMayus);
             const tituloHtml = `<div class="contenedor-titulo-aviso"><span class="titulo-subrayado">${tituloMayus}</span></div>`;
             
-            // Procesar, corregir y validar el Cuerpo del aviso
             let textoMayus = todoMayusculas(areaTexto);
             textoMayus = corregirOrtografiaYTerminos(textoMayus);
 
-            // Validación SGC: Chequear si la visibilidad es menor a 10 sin fenómeno presente
+            // NUEVO: Convertir cualquier URL HTTP/HTTPS a minúsculas automáticamente
+            textoMayus = textoMayus.replace(/HTTPS?:\/\/[^\s<]+/g, function(match) {
+                return match.toLowerCase();
+            });
+
             let visibilidadInvalida = false;
             let match;
             const regexVisibilidad = /VIS(?:IBILIDAD)?[:\s]+(\d+(?:\.\d+)?)\s*KM/g;
@@ -570,7 +535,11 @@
                 alert("ADVERTENCIA DE GESTIÓN DE CALIDAD:\nSe ha detectado una visibilidad menor a 10 KM en el texto sin el registro de un fenómeno meteorológico asociado. Por favor, revise y justifique la reducción de visibilidad.");
             }
 
-            const cuerpoRaw = textoMayus.replace(/\n/g, "<br>");
+            let cuerpoRaw = textoMayus.replace(/\n/g, "<br>");
+            
+            // Reemplazar el marcador temporal por un div estructurado para aplicar la sangría correctamente
+            cuerpoRaw = cuerpoRaw.replace(/@@BULLET@@(.*?)(?:<br>|$)/g, "<div style='padding-left: 45px; text-indent: -15px; margin-top: 4px;'>- $1</div>");
+
             const cuerpoConNegritas = aplicarNegritasEspeciales(cuerpoRaw);
             const cuerpoHtml = `<div class="cuerpo-aviso">${cuerpoConNegritas}</div>`;
             
